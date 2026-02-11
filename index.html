@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Highlight Toolkit – Pro</title>
+<style>
+/* --- CSS VARIABLES & THEME --- */
+:root {
+    --bg-app: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    --bg-panel: rgba(255, 255, 255, 0.9);
+    --bg-card: #ffffff;
+    --text-main: #102a43;
+    --text-sub: #627d98;
+    --border-color: rgba(255,255,255,0.5);
+    --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
+    --card-radius: 18px;
+    --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --input-bg: #f0f4f8;
+}
+
+[data-theme="dark"] {
+    --bg-app: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --bg-panel: rgba(30, 41, 59, 0.95);
+    --bg-card: #1e293b;
+    --text-main: #f1f5f9;
+    --text-sub: #94a3b8;
+    --border-color: rgba(255,255,255,0.1);
+    --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.5);
+    --input-bg: #334155;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-main);
+    background: var(--bg-app);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding-bottom: 50px;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* --- ICONS --- */
+.icon { width: 20px; height: 20px; fill: currentColor; }
+.icon-sm { width: 16px; height: 16px; }
+
+/* --- LAYOUT --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 10px;
+}
+
+h1 {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--text-sub);
+    color: var(--text-main);
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+.theme-toggle:hover { background: var(--input-bg); }
+
+/* --- CONTROL PANEL --- */
+.control-panel {
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    padding: 20px 25px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    border: 1px solid var(--border-color);
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--input-bg);
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+.input-group:focus-within { border-color: #4f46e5; }
+
+.input-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-sub);
+    margin-right: 5px;
+}
+
+input[type="text"] {
+    width: 70px;
+    border: none;
+    background: transparent;
+    font-family: monospace;
+    font-size: 1rem;
+    color: var(--text-main);
+    outline: none;
+    text-transform: uppercase;
+}
+
+input[type="color"] {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(0,0,0,0.1); border-radius: 50%; }
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-sub);
+    padding: 5px;
+    border-radius: 5px;
+    display: flex;
+    transition: 0.2s;
+}
+.icon-btn:hover { background: rgba(0,0,0,0.05); color: #4f46e5; }
+
+.action-btn {
+    background: #102a43;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+[data-theme="dark"] .action-btn { background: #4f46e5; }
+
+.action-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+.action-btn.secondary { background: var(--input-bg); color: var(--text-main); }
+.action-btn.secondary:hover { background: #cbd5e1; }
+[data-theme="dark"] .action-btn.secondary:hover { background: #475569; }
+
+.action-btn.updating { background: #d97706; } 
+
+/* --- GRID & CARD --- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+
+/* Preview */
+.card-preview {
+    height: 160px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: grab;
+}
+.card-preview:active { cursor: grabbing; }
+
+.card-preview textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-main);
+    overflow: hidden;
+}
+
+/* Info Section */
+.card-info {
+    padding: 20px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--input-bg);
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.ratio-box { display: flex; flex-direction: column; }
+.ratio-label { font-size: 0.75rem; color: var(--text-sub); font-weight: 700; text-transform: uppercase; }
+.ratio-value { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
+
+/* Badges */
+.score-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.score-high { background: #d1fae5; color: #065f46; }
+.score-mid { background: #fef3c7; color: #92400e; }
+.score-low { background: #fee2e2; color: #991b1b; }
+
+.wcag-status { display: flex; gap: 8px; font-size: 0.8rem; font-weight: 600; }
+.pill { padding: 4px 10px; border-radius: 6px; background: var(--input-bg); color: var(--text-sub); }
+.pill.pass { background: #102a43; color: white; }
+[data-theme="dark"] .pill.pass { background: #4f46e5; }
+
+/* Menu */
+.card-menu-btn {
+    position: absolute;
+    top: 15px; right: 15px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: inherit; opacity: 0.7;
+    transition: 0.2s;
+}
+.card-menu-btn:hover { opacity: 1; background: rgba(255,255,255,0.4); }
+
+.dropdown {
+    position: absolute;
+    top: 55px; right: 15px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 160px;
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.dropdown button {
+    background: transparent;
+    border: none;
+    padding: 12px 15px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    display: flex; align-items: center; gap: 10px;
+}
+.dropdown button:hover { background: var(--input-bg); }
+.dropdown button.delete-btn { color: #ef4444; }
+.dropdown button.delete-btn:hover { background: #fef2f2; }
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    color: var(--text-sub);
+    font-style: italic;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    display: none; place-items: center;
+    z-index: 1000;
+}
+.modal-box {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 450px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    color: var(--text-main);
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Color Highlight Toolkit</h1>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+        </button>
+    </header>
+
+    <div class="control-panel">
+        
+        <div class="input-group">
+            <span class="input-label">Background</span>
+            <input type="color" id="bgPicker" value="#ffffff">
+            #<input type="text" id="bgHex" value="FFFFFF" maxlength="6">
+        </div>
+
+        <div class="input-group">
+            <span class="input-label">Text</span>
+            <input type="color" id="textPicker" value="#000000">
+            #<input type="text" id="textHex" value="000000" maxlength="6">
+            
+            <button class="icon-btn" onclick="suggestTextColor()" title="Auto-suggest best text color">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M7.5 5.6L10 7 8.6 4.5 10 2 7.5 3.4 5 2 6.4 4.5 5 7zM19 2l-1.4 2.5L15.1 5.9l2.5 1.4L19 9.8l1.4-2.5 2.5-1.4-2.5-1.4zM11.6 10.3L9.7 18.9l-2.2-4.8L2.7 11.9l8.6-1.9 4.8-8.6 1.9 8.6 8.6 1.9-8.6 4.8-1.9 8.6-4.5-15z" opacity="0.8"/></svg>
+            </button>
+        </div>
+
+        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()">
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            <span>Add Box</span>
+        </button>
+        
+        <button class="action-btn secondary" onclick="toggleInfo()">
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z"/></svg>
+        </button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal-overlay" id="infoModal">
+    <div class="modal-box">
+        <h3>User Guide</h3>
+        <p><strong>1. Smart Input:</strong> Use the color pickers or type HEX codes directly. Click the Magic Wand (✨) to auto-find the best text color.</p>
+        <p><strong>2. Scoring:</strong></p>
+        <ul style="padding-left: 20px; opacity: 0.8;">
+            <li>10 = Perfect (7:1+)</li>
+            <li>6-8 = Good (4.5:1+)</li>
+            <li>1-3 = Poor (&lt; 3:1)</li>
+        </ul>
+        <p><strong>3. Organize:</strong> Drag cards to reorder priorities.</p>
+        <div style="text-align: right; margin-top: 20px;">
+            <button class="action-btn" onclick="toggleInfo()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 1. ICONS (SVG STRINGS)
+// ==========================================
+const ICONS = {
+    menu: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5.25a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5.25a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" /></svg>`,
+    edit: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" stroke="currentColor" stroke-width="2" fill="none" /></svg>`,
+    copy: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`,
+    trash: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`
+};
+
+// ==========================================
+// 2. STATE & INIT
+// ==========================================
+let cardsData = JSON.parse(localStorage.getItem("highlightToolkitData")) || []; // No dummy data
+let editingId = null;
+
+// Initialize Theme
+const savedTheme = localStorage.getItem("theme") || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+// ==========================================
+// 3. COLOR LOGIC
+// ==========================================
+
+function hexToRgb(hex) {
+    hex = hex.replace("#", "");
+    if(hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+    return {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16)
+    };
+}
+
+function luminance(r, g, b) {
+    let a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+}
+
+function calculateContrast(bg, text) {
+    const b = hexToRgb(bg);
+    const t = hexToRgb(text);
+    if(isNaN(b.r) || isNaN(t.r)) return 1; // Fallback
+    const L1 = luminance(b.r, b.g, b.b);
+    const L2 = luminance(t.r, t.g, t.b);
+    return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+}
+
+function getRatingData(ratio) {
+    let score = (ratio / 7) * 10;
+    score = Math.min(10, Math.max(1, score)).toFixed(1);
+
+    if (ratio >= 7) return { score, label: 'Excellent', class: 'score-high', aaa: true, aa: true };
+    if (ratio >= 4.5) return { score, label: 'Good', class: 'score-high', aaa: false, aa: true };
+    if (ratio >= 3) return { score, label: 'Risky', class: 'score-mid', aaa: false, aa: false };
+    return { score, label: 'Poor', class: 'score-low', aaa: false, aa: false };
+}
+
+function suggestTextColor() {
+    const bg = document.getElementById('bgPicker').value;
+    const b = hexToRgb(bg);
+    const lum = luminance(b.r, b.g, b.b);
+    
+    // Simple logic: if bg is bright (lum > 0.5), use black, else white
+    const bestText = lum > 0.5 ? '#000000' : '#ffffff';
+    
+    document.getElementById('textPicker').value = bestText;
+    document.getElementById('textHex').value = bestText.replace("#","");
+}
+
+// ==========================================
+// 4. UI RENDERING
+// ==========================================
+const grid = document.getElementById('grid');
+
+function render() {
+    grid.innerHTML = '';
+    
+    if(cardsData.length === 0) {
+        grid.innerHTML = `<div class="empty-state">No colors yet. Add a box to start testing!</div>`;
+        return;
+    }
+
+    cardsData.forEach((card, index) => {
+        const ratio = calculateContrast(card.bg, card.text);
+        const rating = getRatingData(ratio);
+        
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+        cardEl.draggable = true;
+        cardEl.dataset.index = index;
+        cardEl.innerHTML = `
+            <div class="card-preview" style="background-color: ${card.bg}; color: ${card.text}">
+                <button class="card-menu-btn" onclick="toggleMenu(event, '${card.id}')">${ICONS.menu}</button>
+                <div class="dropdown" id="dropdown-${card.id}">
+                    <button onclick="editCard('${card.id}')">${ICONS.edit} Edit</button>
+                    <button onclick="copyHex('${card.bg}', this)">${ICONS.copy} Copy BG</button>
+                    <button class="delete-btn" onclick="deleteCard('${card.id}')">${ICONS.trash} Delete</button>
+                </div>
+                <textarea spellcheck="false" oninput="updateContent('${card.id}', this.value)">${card.content}</textarea>
+            </div>
+            <div class="card-info">
+                <div class="stats-row">
+                    <div class="ratio-box">
+                        <span class="ratio-label">Contrast</span>
+                        <span class="ratio-value">${ratio.toFixed(2)}</span>
+                    </div>
+                    <div class="score-badge ${rating.class}">
+                        <span>${rating.score}</span>/10
+                    </div>
+                </div>
+                <div class="wcag-status">
+                    <span class="pill ${rating.aa ? 'pass' : ''}">AA</span>
+                    <span class="pill ${rating.aaa ? 'pass' : ''}">AAA</span>
+                    <span style="margin-left:auto; opacity:0.7;">${rating.label}</span>
+                </div>
+            </div>
+        `;
+        addDragEvents(cardEl);
+        grid.appendChild(cardEl);
+    });
+    save();
+}
+
+// ==========================================
+// 5. INPUT SYNCING
+// ==========================================
+// Helper to sync Hex text <-> Color Picker
+function setupSync(pickerId, hexId) {
+    const picker = document.getElementById(pickerId);
+    const hex = document.getElementById(hexId);
+
+    picker.addEventListener('input', (e) => {
+        hex.value = e.target.value.replace("#", "").toUpperCase();
+    });
+
+    hex.addEventListener('input', (e) => {
+        let val = e.target.value.replace("#", "");
+        if (val.length === 6) picker.value = "#" + val;
+    });
+}
+
+setupSync('bgPicker', 'bgHex');
+setupSync('textPicker', 'textHex');
+
+// ==========================================
+// 6. ACTIONS
+// ==========================================
+function handleMainAction() {
+    const bg = document.getElementById('bgPicker').value;
+    const text = document.getElementById('textPicker').value;
+    
+    if (editingId) {
+        const index = cardsData.findIndex(c => c.id == editingId);
+        if (index > -1) {
+            cardsData[index].bg = bg;
+            cardsData[index].text = text;
+            render();
+            resetControls();
+        }
+    } else {
+        cardsData.unshift({ id: Date.now(), bg, text, content: "Hello World" });
+        render();
+    }
+}
+
+function updateContent(id, text) {
+    const card = cardsData.find(c => c.id == id);
+    if(card) card.content = text;
+    save();
+}
+
+function deleteCard(id) {
+    if(confirm("Delete this combination?")) {
+        cardsData = cardsData.filter(c => c.id != id);
+        render();
+    }
+}
+
+function editCard(id) {
+    const card = cardsData.find(c => c.id == id);
+    if(!card) return;
+
+    document.getElementById('bgPicker').value = card.bg;
+    document.getElementById('bgHex').value = card.bg.replace("#", "").toUpperCase();
+    document.getElementById('textPicker').value = card.text;
+    document.getElementById('textHex').value = card.text.replace("#", "").toUpperCase();
+    
+    editingId = id;
+    const btn = document.getElementById("mainActionBtn");
+    btn.innerHTML = `${ICONS.edit} <span>Update Box</span>`;
+    btn.classList.add("updating");
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    closeDropdowns();
+}
+
+function resetControls() {
+    editingId = null;
+    const btn = document.getElementById("mainActionBtn");
+    btn.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg> <span>Add Box</span>`;
+    btn.classList.remove("updating");
+}
+
+function copyHex(val, btn) {
+    navigator.clipboard.writeText(val);
+    let original = btn.innerHTML;
+    btn.innerHTML = "Copied!";
+    setTimeout(() => btn.innerHTML = original, 1000);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem("theme", next);
+}
+
+// ==========================================
+// 7. DRAG & DROP & UTILS
+// ==========================================
+let dragSrcEl = null;
+
+function addDragEvents(item) {
+    item.addEventListener('dragstart', function(e) {
+        this.style.opacity = '0.4';
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    });
+    item.addEventListener('dragover', e => { e.preventDefault(); return false; });
+    item.addEventListener('drop', function(e) {
+        e.stopPropagation();
+        if (dragSrcEl !== this) {
+            const srcIdx = parseInt(dragSrcEl.dataset.index);
+            const targetIdx = parseInt(this.dataset.index);
+            const [moved] = cardsData.splice(srcIdx, 1);
+            cardsData.splice(targetIdx, 0, moved);
+            render();
+        }
+        return false;
+    });
+    item.addEventListener('dragend', function() {
+        this.style.opacity = '1';
+    });
+}
+
+function save() { localStorage.setItem("highlightToolkitData", JSON.stringify(cardsData)); }
+function toggleInfo() { 
+    const m = document.getElementById('infoModal'); 
+    m.style.display = m.style.display === 'grid' ? 'none' : 'grid'; 
+}
+function toggleMenu(e, id) {
+    e.stopPropagation();
+    closeDropdowns();
+    const m = document.getElementById(`dropdown-${id}`);
+    m.style.display = 'flex';
+}
+function closeDropdowns() { document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
+document.addEventListener('click', closeDropdowns);
+
+// Start
+render();
+
+</script>
+</body>
+</html>
