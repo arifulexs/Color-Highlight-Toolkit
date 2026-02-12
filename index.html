@@ -3,368 +3,279 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Highlight Toolkit – Pro</title>
+<title>Color Toolkit – Ultimate</title>
 <style>
 /* --- CSS VARIABLES & THEME --- */
 :root {
-    --bg-app: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
-    --bg-panel: rgba(255, 255, 255, 0.9);
+    --bg-app: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --bg-panel: rgba(255, 255, 255, 0.85);
     --bg-card: #ffffff;
-    --text-main: #102a43;
-    --text-sub: #627d98;
-    --border-color: rgba(255,255,255,0.5);
-    --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
-    --card-radius: 18px;
-    --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    --input-bg: #f0f4f8;
+    --text-main: #0f172a;
+    --text-sub: #64748b;
+    --border-color: #e2e8f0;
+    --accent: #3b82f6;
+    --danger: #ef4444;
+    --success: #10b981;
+    --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --card-radius: 16px;
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --input-bg: #f1f5f9;
 }
 
 [data-theme="dark"] {
-    --bg-app: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --bg-panel: rgba(30, 41, 59, 0.95);
+    --bg-app: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    --bg-panel: rgba(30, 41, 59, 0.85);
     --bg-card: #1e293b;
     --text-main: #f1f5f9;
     --text-sub: #94a3b8;
-    --border-color: rgba(255,255,255,0.1);
-    --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
-    --shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.5);
+    --border-color: #334155;
+    --accent: #6366f1;
     --input-bg: #334155;
 }
 
+* { box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
+
 body {
-    margin: 0;
-    font-family: var(--font-main);
-    background: var(--bg-app);
-    color: var(--text-main);
-    min-height: 100vh;
-    padding-bottom: 50px;
-    transition: background 0.3s, color 0.3s;
+    margin: 0; font-family: var(--font-main); background: var(--bg-app);
+    color: var(--text-main); min-height: 100vh; padding-bottom: 80px;
 }
+
+/* --- ANIMATIONS --- */
+@keyframes slideInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.animate-fade { animation: fadeIn 0.4s ease-out; }
+.card { animation: slideInUp 0.4s ease-out backwards; }
 
 /* --- ICONS --- */
-.icon { width: 20px; height: 20px; fill: currentColor; }
-.icon-sm { width: 16px; height: 16px; }
+.icon { width: 20px; height: 20px; fill: currentColor; display: inline-block; vertical-align: middle; }
+.icon-sm { width: 16px; height: 16px; fill: currentColor; }
 
 /* --- LAYOUT --- */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 0 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 30px; padding: 0 10px;
 }
 
-h1 {
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin: 0;
+/* --- TOASTS --- */
+#toast-container {
+    position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 10px; pointer-events: none;
 }
-
-.theme-toggle {
-    background: transparent;
-    border: 1px solid var(--text-sub);
-    color: var(--text-main);
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
+.toast {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    padding: 12px 20px; border-radius: 12px; box-shadow: var(--shadow-hover);
+    display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 500;
+    animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--text-main); border-left: 4px solid var(--accent);
+    pointer-events: auto; min-width: 250px;
 }
-.theme-toggle:hover { background: var(--input-bg); }
+.toast.success { border-left-color: var(--success); }
+.toast.danger { border-left-color: var(--danger); }
 
 /* --- CONTROL PANEL --- */
 .control-panel {
-    background: var(--bg-panel);
-    backdrop-filter: blur(10px);
-    padding: 20px 25px;
-    border-radius: 20px;
-    box-shadow: var(--shadow-soft);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    position: sticky;
-    top: 20px;
-    z-index: 100;
-    border: 1px solid var(--border-color);
-    max-width: 900px;
-    margin: 0 auto 40px auto;
+    background: var(--bg-panel); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    padding: 15px 25px; border-radius: 50px; box-shadow: var(--shadow-soft);
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 15px; position: sticky; top: 20px; z-index: 100;
+    border: 1px solid var(--border-color); max-width: fit-content; margin: 0 auto 40px auto;
 }
 
 .input-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--input-bg);
-    padding: 8px 12px;
-    border-radius: 12px;
-    border: 1px solid transparent;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--input-bg); padding: 5px 12px;
+    border-radius: 25px; border: 1px solid transparent;
+    transition: 0.2s;
 }
-
-.input-group:focus-within { border-color: #4f46e5; }
-
-.input-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-sub);
-    margin-right: 5px;
-}
+.input-group:focus-within { border-color: var(--accent); }
 
 input[type="text"] {
-    width: 70px;
-    border: none;
-    background: transparent;
-    font-family: monospace;
-    font-size: 1rem;
-    color: var(--text-main);
-    outline: none;
+    width: 65px; border: none; background: transparent;
+    font-family: monospace; font-size: 0.95rem; color: var(--text-main); outline: none;
     text-transform: uppercase;
 }
 
 input[type="color"] {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: none;
-    cursor: pointer;
+    width: 28px; height: 28px; border: none; background: none; cursor: pointer; border-radius: 50%;
 }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(0,0,0,0.1); border-radius: 50%; }
+input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(0,0,0,0.1); border-radius: 50%; }
 
-.icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-sub);
-    padding: 5px;
-    border-radius: 5px;
-    display: flex;
-    transition: 0.2s;
+.btn-icon {
+    background: transparent; border: 1px solid var(--border-color);
+    color: var(--text-main); padding: 10px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.icon-btn:hover { background: rgba(0,0,0,0.05); color: #4f46e5; }
+.btn-icon:hover { background: var(--input-bg); transform: scale(1.1); }
+.btn-icon:active { transform: scale(0.95); }
 
-.action-btn {
-    background: #102a43;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.btn-primary {
+    background: var(--text-main); color: var(--bg-card);
+    border: none; padding: 10px 24px; border-radius: 25px;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: transform 0.2s, opacity 0.2s;
 }
-[data-theme="dark"] .action-btn { background: #4f46e5; }
+[data-theme="dark"] .btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
 
-.action-btn:hover { transform: translateY(-1px); opacity: 0.9; }
-.action-btn.secondary { background: var(--input-bg); color: var(--text-main); }
-.action-btn.secondary:hover { background: #cbd5e1; }
-[data-theme="dark"] .action-btn.secondary:hover { background: #475569; }
-
-.action-btn.updating { background: #d97706; } 
-
-/* --- GRID & CARD --- */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 30px;
-}
+/* --- GRID & CARDS --- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
 
 .card {
-    background: var(--bg-card);
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow-soft);
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    border: 1px solid var(--border-color);
+    background: var(--bg-card); border-radius: var(--card-radius);
+    box-shadow: var(--shadow-soft); overflow: hidden; position: relative;
+    border: 1px solid var(--border-color); transition: transform 0.3s, box-shadow 0.3s;
 }
+.card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
 
-.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-
-/* Preview */
 .card-preview {
-    height: 160px;
-    padding: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 140px; padding: 20px; display: flex; align-items: center; justify-content: center;
     position: relative;
-    cursor: grab;
 }
-.card-preview:active { cursor: grabbing; }
-
 .card-preview textarea {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    resize: none;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    font-family: var(--font-main);
-    overflow: hidden;
-    color: inherit;
+    width: 100%; background: transparent; border: none; outline: none; resize: none;
+    text-align: center; font-size: 1.3rem; font-weight: 700; color: inherit;
+    font-family: var(--font-main); overflow: hidden;
 }
 
-/* Info Section */
-.card-info {
-    padding: 20px;
-    background: var(--bg-card);
-    border-top: 1px solid var(--input-bg);
-}
+.card-info { padding: 15px 20px; border-top: 1px solid var(--border-color); }
+.stats-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+.ratio-val { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+.ratio-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-top: 4px; }
 
-.stats-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
+.badges { display: flex; gap: 6px; font-size: 0.75rem; font-weight: 700; }
+.pill { padding: 4px 10px; border-radius: 6px; background: var(--input-bg); color: var(--text-sub); opacity: 0.4; }
+.pill.active { background: var(--text-main); color: var(--bg-card); opacity: 1; }
+[data-theme="dark"] .pill.active { background: var(--accent); color: white; }
+.pill.pass { background: #dcfce7; color: #166534; opacity: 1; }
+.pill.fail { background: #fee2e2; color: #991b1b; opacity: 1; }
 
-.ratio-box { display: flex; flex-direction: column; }
-.ratio-label { font-size: 0.75rem; color: var(--text-sub); font-weight: 700; text-transform: uppercase; }
-.ratio-value { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
-
-/* Badges */
-.score-badge {
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.score-high { background: #d1fae5; color: #065f46; }
-.score-mid { background: #fef3c7; color: #92400e; }
-.score-low { background: #fee2e2; color: #991b1b; }
-
-.wcag-status { display: flex; gap: 8px; font-size: 0.8rem; font-weight: 600; }
-.pill { padding: 4px 10px; border-radius: 6px; background: var(--input-bg); color: var(--text-sub); }
-.pill.pass { background: #102a43; color: white; }
-[data-theme="dark"] .pill.pass { background: #4f46e5; }
-
-/* Menu */
 .card-menu-btn {
-    position: absolute;
-    top: 15px; right: 15px;
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.3);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: inherit; opacity: 0.7;
-    transition: 0.2s;
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255,255,255,0.25); backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 50%; width: 32px; height: 32px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: inherit; opacity: 0; transition: 0.2s;
 }
-.card-menu-btn:hover { opacity: 1; background: rgba(255,255,255,0.4); }
+.card:hover .card-menu-btn { opacity: 1; }
 
 .dropdown {
-    position: absolute;
-    top: 55px; right: 15px;
-    background: var(--bg-card);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    width: 160px;
-    display: none;
-    flex-direction: column;
-    z-index: 10;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
+    position: absolute; top: 50px; right: 12px; background: var(--bg-card);
+    border: 1px solid var(--border-color); border-radius: 12px;
+    box-shadow: var(--shadow-hover); display: none; flex-direction: column;
+    z-index: 50; overflow: hidden; min-width: 150px; animation: fadeIn 0.1s ease;
 }
-
 .dropdown button {
-    background: transparent;
-    border: none;
-    padding: 12px 15px;
-    text-align: left;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--text-main);
-    display: flex; align-items: center; gap: 10px;
+    background: transparent; border: none; padding: 12px 16px; text-align: left;
+    font-size: 0.85rem; cursor: pointer; color: var(--text-main); font-weight: 500;
+    display: flex; align-items: center; gap: 10px; width: 100%;
 }
 .dropdown button:hover { background: var(--input-bg); }
-.dropdown button.delete-btn { color: #ef4444; }
-.dropdown button.delete-btn:hover { background: #fef2f2; }
+.dropdown button.danger { color: var(--danger); }
 
-/* Empty State */
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px;
-    color: var(--text-sub);
-    font-style: italic;
-}
-
-/* Modal */
+/* --- MODALS --- */
 .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(4px);
-    display: none; place-items: center;
-    z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px); display: none; place-items: center; z-index: 1000;
 }
-.modal-box {
-    background: var(--bg-card);
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 450px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-    color: var(--text-main);
+.modal {
+    background: var(--bg-card); padding: 30px; border-radius: 24px; width: 90%;
+    max-width: 600px; max-height: 85vh; overflow-y: auto;
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-hover);
+    animation: slideInUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-sub); }
+
+/* Info Page Styling */
+.guide-section { margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 25px; }
+.guide-section:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
+.guide-section h4 { margin: 0 0 12px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; color: var(--accent); }
+.guide-section p { font-size: 0.95rem; line-height: 1.6; color: var(--text-sub); margin: 0 0 20px 0; }
+
+.grade-row { display: grid; grid-template-columns: 60px 1fr; gap: 15px; margin-bottom: 12px; align-items: start; }
+.grade-tag { 
+    font-family: monospace; background: var(--input-bg); padding: 4px; 
+    border-radius: 6px; font-weight: 700; color: var(--text-main); 
+    text-align: center; font-size: 0.8rem; border: 1px solid var(--border-color);
+}
+.grade-desc { font-size: 0.9rem; color: var(--text-sub); line-height: 1.4; }
+
+textarea.code-box {
+    width: 100%; height: 120px; background: var(--input-bg); color: var(--text-main);
+    border: 1px solid var(--border-color); border-radius: 12px; padding: 15px;
+    font-family: monospace; font-size: 0.9rem; resize: vertical; outline: none;
+}
+textarea.code-box:focus { border-color: var(--accent); }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div id="toast-container"></div>
+
+<div class="container animate-fade">
     <header>
-        <div>
-            <h1>Color Highlight Toolkit</h1>
+        <h2>Color Toolkit <span style="font-weight: 300; opacity: 0.7;">Ultimate</span></h2>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-icon" onclick="openBulkInput()" title="Bulk Add Colors">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            </button>
+            <button class="btn-icon" onclick="openExport()" title="Export JSON/CSS">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M16.59 9H15V4c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v5H7.41c-.89 0-1.34 1.08-.71 1.71l4.59 4.59c.39.39 1.02.39 1.41 0l4.59-4.59c.63-.63.19-1.71-.7-1.71zM5 19c0 .55.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1H6c-.55 0-1 .45-1 1z"/></svg>
+            </button>
+            <button class="btn-icon" onclick="openSettings()" title="Settings">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+            </button>
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle Theme">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>
+            </button>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
-        </button>
     </header>
 
     <div class="control-panel">
-        
         <div class="input-group">
-            <span class="input-label">Background</span>
-            <input type="color" id="bgPicker" value="#ffffff">
+            <input type="color" id="bgPicker" value="#ffffff" title="Background Color">
+            <input type="color" id="bgPicker2" style="display:none;" value="#f1f5f9" title="Gradient End Color">
             #<input type="text" id="bgHex" value="FFFFFF" maxlength="6">
         </div>
 
+        <button class="btn-icon" onclick="swapColors()" title="Swap Colors">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+        </button>
+
         <div class="input-group">
-            <span class="input-label">Text</span>
-            <input type="color" id="textPicker" value="#000000">
-            #<input type="text" id="textHex" value="000000" maxlength="6">
-            
-            <button class="icon-btn" onclick="suggestTextColor()" title="Auto-suggest best text color">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M7.5 5.6L10 7 8.6 4.5 10 2 7.5 3.4 5 2 6.4 4.5 5 7zM19 2l-1.4 2.5L15.1 5.9l2.5 1.4L19 9.8l1.4-2.5 2.5-1.4-2.5-1.4zM11.6 10.3L9.7 18.9l-2.2-4.8L2.7 11.9l8.6-1.9 4.8-8.6 1.9 8.6 8.6 1.9-8.6 4.8-1.9 8.6-4.5-15z" opacity="0.8"/></svg>
+            <input type="color" id="textPicker" value="#0f172a" title="Text Color">
+            #<input type="text" id="textHex" value="0F172A" maxlength="6">
+            <button class="btn-icon" onclick="smartFix()" style="border:none; width:30px; height:30px;" title="Smart Fix: Suggest high contrast color">
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M7.5 5.6L10 7 8.6 4.5 10 2 7.5 3.4 5 2 6.4 4.5 5 7zM19.5 15.4l-2.5-1.4 1.4 2.5-1.4 2.5 2.5-1.4 2.5 1.4-1.4-2.5 1.4-2.5zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5zM13.31 12.83L4.91 21.23c-.39.39-1.02.39-1.41 0L2.77 20.5c-.39-.39-.39-1.02 0-1.41l8.4-8.4c.39-.39 1.02-.39 1.41 0l.73.73c.39.4.39 1.03 0 1.41z"/></svg>
             </button>
         </div>
 
-        <button class="action-btn" id="mainActionBtn" onclick="handleMainAction()">
-            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-            <span>Add Box</span>
+        <button class="btn-primary" id="addBtn" onclick="addBox()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Add Box
         </button>
-        
-        <button class="action-btn secondary" onclick="toggleInfo()" title="User Guide">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+
+        <button class="btn-icon" onclick="toggleGradient()" title="Toggle Gradient Mode">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        </button>
+
+        <button class="btn-icon" onclick="openInfo()" title="Accessibility Guide">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </button>
+
+        <button class="btn-icon" onclick="bulkDelete()" style="color:var(--danger); border-color:var(--danger);" title="Delete All Cards">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13zM9 8h2v9H9zm4 0h2v9h-2z"/></svg>
         </button>
     </div>
 
@@ -372,290 +283,394 @@ input[type="color"]::-webkit-color-swatch { border: 2px solid rgba(0,0,0,0.1); b
 </div>
 
 <div class="modal-overlay" id="infoModal">
-    <div class="modal-box">
-        <h3>User Guide</h3>
-        <p><strong>1. Smart Input:</strong> Use the color pickers or type HEX codes directly. Click the Magic Wand (✨) to auto-find the best text color.</p>
-        <p><strong>2. Scoring:</strong></p>
-        <ul style="padding-left: 20px; opacity: 0.8;">
-            <li>10 = Perfect (7:1+)</li>
-            <li>6-8 = Good (4.5:1+)</li>
-            <li>1-3 = Poor (&lt; 3:1)</li>
-        </ul>
-        <p><strong>3. Organize:</strong> Drag cards to reorder priorities.</p>
-        <div style="text-align: right; margin-top: 20px;">
-            <button class="action-btn" onclick="toggleInfo()">Close</button>
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Accessibility Standards Guide</h3>
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+        </div>
+        
+        <div class="guide-section">
+            <h4><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg> WCAG 2.1 (The Current Standard)</h4>
+            <p>Web Content Accessibility Guidelines use a mathematical <strong>Ratio</strong> comparing the luminance of the foreground and background. Scores range from 1:1 (invisible) to 21:1 (black on white).</p>
+            
+            <div class="grade-row">
+                <span class="grade-tag">AA</span>
+                <span class="grade-desc"><strong>Mid Tier (Minimum):</strong> Requires a ratio of at least <strong>4.5:1</strong> for normal text. This is the legal minimum for most web compliance.</span>
+            </div>
+            <div class="grade-row">
+                <span class="grade-tag">AAA</span>
+                <span class="grade-desc"><strong>High Tier (Enhanced):</strong> Requires a ratio of <strong>7:1</strong>. This is the gold standard, readable by people with moderately low vision without assistive tech.</span>
+            </div>
+            <div class="grade-row">
+                <span class="grade-tag">Large</span>
+                <span class="grade-desc">Large text (18pt+ or 14pt+ bold) is easier to read, so it requires lower ratios: <strong>3:1</strong> for AA and <strong>4.5:1</strong> for AAA.</span>
+            </div>
+        </div>
+
+        <div class="guide-section">
+            <h4><svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> APCA (The Future / Perceptual)</h4>
+            <p>Advanced Perceptual Contrast Algorithm (candidate for WCAG 3.0). Instead of a simple math ratio, it calculates <strong>Lightness Contrast (Lc)</strong> based on how the human eye actually perceives brightness differences.</p>
+            
+            <div class="grade-row">
+                <span class="grade-tag">Lc 90</span>
+                <span class="grade-desc">Excellent. Preferred for body text and detailed reading.</span>
+            </div>
+            <div class="grade-row">
+                <span class="grade-tag">Lc 75</span>
+                <span class="grade-desc">Good. The minimum for body text, but great for headlines.</span>
+            </div>
+            <div class="grade-row">
+                <span class="grade-tag">Lc 60</span>
+                <span class="grade-desc">Bare minimum. Only use for large, non-essential text or graphical controls.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="bulkModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Bulk Color Input</h3>
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+        </div>
+        <p style="margin-bottom:10px; color:var(--text-sub);">Paste text containing Hex codes (e.g., "#ff0000, #00ff00"). We will auto-detect them and generate cards.</p>
+        <textarea id="bulkArea" class="code-box" placeholder="#1e293b, #3b82f6, #ef4444..."></textarea>
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn-primary" onclick="processBulk()">Generate Cards</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="exportModal">
+    <div class="modal">
+        <div class="modal-header"><h3>Export Data</h3><button class="close-modal" onclick="closeModals()">&times;</button></div>
+        <textarea id="exportArea" class="code-box" readonly></textarea>
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn-primary" onclick="copyExport()">Copy to Clipboard</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+        <div class="modal-header"><h3>Settings</h3><button class="close-modal" onclick="closeModals()">&times;</button></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+            <span><strong>Contrast Algorithm</strong><br><small style="color:var(--text-sub)">Method used for scoring</small></span>
+            <select id="algoSelect" onchange="updateSettings()" style="padding:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-main);">
+                <option value="WCAG">WCAG 2.1 (Standard)</option>
+                <option value="APCA">APCA (Perceptual)</option>
+            </select>
         </div>
     </div>
 </div>
 
 <script>
 // ==========================================
-// 1. ICONS (SVG STRINGS)
+// 1. STATE & DATA
 // ==========================================
-const ICONS = {
-    menu: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5.25a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5.25a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" /></svg>`,
-    edit: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" stroke="currentColor" stroke-width="2" fill="none" /></svg>`,
-    copy: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`,
-    trash: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>`
+let cardsData = JSON.parse(localStorage.getItem("ult_toolkit_data")) || [];
+let settings = JSON.parse(localStorage.getItem("ult_settings")) || { algo: 'WCAG' };
+let editId = null;
+let isGrad = false;
+
+// ==========================================
+// 2. TOAST SYSTEM (Notifications)
+// ==========================================
+function showToast(msg, type = 'normal') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Icons
+    let iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'; // Info
+    if (type === 'success') iconPath = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z';
+    if (type === 'danger') iconPath = 'M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z';
+
+    toast.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="${iconPath}"/></svg> <span>${msg}</span>`;
+    
+    container.appendChild(toast);
+    
+    // Remove after 3s
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ==========================================
+// 3. COLOR MATH (Engine)
+// ==========================================
+const h2r = (h) => {
+    let r = 0, g = 0, b = 0; h = h.replace("#","");
+    if(h.length === 3) h = h.split('').map(c=>c+c).join('');
+    r = parseInt(h.substring(0,2), 16); g = parseInt(h.substring(2,4), 16); b = parseInt(h.substring(4,6), 16);
+    return {r, g, b};
 };
 
-// ==========================================
-// 2. STATE & INIT
-// ==========================================
-let cardsData = JSON.parse(localStorage.getItem("highlightToolkitData")) || []; // No dummy data
-let editingId = null;
-
-// Initialize Theme
-const savedTheme = localStorage.getItem("theme") || 'light';
-document.documentElement.setAttribute('data-theme', savedTheme);
-
-// ==========================================
-// 3. COLOR LOGIC
-// ==========================================
-
-function hexToRgb(hex) {
-    hex = hex.replace("#", "");
-    if(hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
-    return {
-        r: parseInt(hex.substring(0, 2), 16),
-        g: parseInt(hex.substring(2, 4), 16),
-        b: parseInt(hex.substring(4, 6), 16)
-    };
-}
-
-function luminance(r, g, b) {
-    let a = [r, g, b].map(v => {
-        v /= 255;
-        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
+const lum = (c) => {
+    let a = [c.r, c.g, c.b].map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
     return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+};
+
+function getRatio(c1, c2) {
+    const l1 = lum(c1), l2 = lum(c2);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
 
-function calculateContrast(bg, text) {
-    const b = hexToRgb(bg);
-    const t = hexToRgb(text);
-    if(isNaN(b.r) || isNaN(t.r)) return 1; // Fallback
-    const L1 = luminance(b.r, b.g, b.b);
-    const L2 = luminance(t.r, t.g, t.b);
-    return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
-}
-
-function getRatingData(ratio) {
-    let score = (ratio / 7) * 10;
-    score = Math.min(10, Math.max(1, score)).toFixed(1);
-
-    if (ratio >= 7) return { score, label: 'Excellent', class: 'score-high', aaa: true, aa: true };
-    if (ratio >= 4.5) return { score, label: 'Good', class: 'score-high', aaa: false, aa: true };
-    if (ratio >= 3) return { score, label: 'Risky', class: 'score-mid', aaa: false, aa: false };
-    return { score, label: 'Poor', class: 'score-low', aaa: false, aa: false };
-}
-
-function suggestTextColor() {
-    const bg = document.getElementById('bgPicker').value;
-    const b = hexToRgb(bg);
-    const lum = luminance(b.r, b.g, b.b);
-    
-    // Simple logic: if bg is bright (lum > 0.5), use black, else white
-    const bestText = lum > 0.5 ? '#000000' : '#ffffff';
-    
-    document.getElementById('textPicker').value = bestText;
-    document.getElementById('textHex').value = bestText.replace("#","");
+// Simplified APCA (Lc) estimation
+function getLc(bg, txt) {
+    const lbg = Math.pow(bg.r/255, 2.218) * 0.2126 + Math.pow(bg.g/255, 2.218) * 0.7152 + Math.pow(bg.b/255, 2.218) * 0.0722;
+    const ltxt = Math.pow(txt.r/255, 2.218) * 0.2126 + Math.pow(txt.g/255, 2.218) * 0.7152 + Math.pow(txt.b/255, 2.218) * 0.0722;
+    let lc = (Math.pow(lbg, 0.56) - Math.pow(ltxt, 0.57)) * 1.618;
+    return Math.round(Math.abs(lc) * 100);
 }
 
 // ==========================================
-// 4. UI RENDERING
+// 4. MAIN LOGIC
 // ==========================================
-const grid = document.getElementById('grid');
-
 function render() {
-    grid.innerHTML = '';
-    
-    if(cardsData.length === 0) {
-        grid.innerHTML = `<div class="empty-state">No colors yet. Add a box to start testing!</div>`;
-        return;
-    }
+    const g = document.getElementById('grid'); g.innerHTML = '';
+    cardsData.forEach((c, i) => {
+        const bg1 = h2r(c.bg), txt = h2r(c.text);
+        let val, labelStr;
+        let pass = false, mid = false, fail = false;
 
-    cardsData.forEach((card, index) => {
-        const ratio = calculateContrast(card.bg, card.text);
-        const rating = getRatingData(ratio);
+        if(settings.algo === 'WCAG') {
+            val = getRatio(bg1, txt);
+            if(c.bg2) { const r2 = getRatio(h2r(c.bg2), txt); val = Math.min(val, r2); } // Grad worst case
+            
+            pass = val >= 7; mid = val >= 4.5 && val < 7; fail = val < 4.5;
+            // Large text check (simplified visual)
+            let largeAA = val >= 3;
+            
+            labelStr = `
+                <span class="pill ${val >= 4.5 ? 'pass' : 'fail'}">AA ${val >= 4.5 ? 'Pass' : 'Fail'}</span>
+                <span class="pill ${val >= 7 ? 'pass' : (val < 4.5 ? 'fail' : '')}">AAA</span>
+            `;
+            val = val.toFixed(2);
+        } else {
+            val = getLc(bg1, txt);
+            if(c.bg2) { const l2 = getLc(h2r(c.bg2), txt); val = Math.min(val, l2); }
+            
+            labelStr = `
+                <span class="pill ${val >= 75 ? 'pass' : 'fail'}">Body ${val >= 75 ? 'Yes' : 'No'}</span>
+                <span class="pill ${val >= 60 ? 'pass' : 'fail'}">Large ${val >= 60 ? 'Yes' : 'No'}</span>
+            `;
+            val = 'Lc ' + val;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = `${Math.min(i * 0.05, 0.5)}s`;
         
-        const cardEl = document.createElement('div');
-        cardEl.className = 'card';
-        cardEl.draggable = true;
-        cardEl.dataset.index = index;
-        cardEl.innerHTML = `
-            <div class="card-preview" style="background-color: ${card.bg}; color: ${card.text}">
-                <button class="card-menu-btn" onclick="toggleMenu(event, '${card.id}')">${ICONS.menu}</button>
-                <div class="dropdown" id="dropdown-${card.id}">
-                    <button onclick="editCard('${card.id}')">${ICONS.edit} Edit</button>
-                    <button onclick="copyHex('${card.bg}', this)">${ICONS.copy} Copy BG</button>
-                    <button class="delete-btn" onclick="deleteCard('${card.id}')">${ICONS.trash} Delete</button>
+        const gradStyle = c.bg2 ? `background: linear-gradient(135deg, ${c.bg}, ${c.bg2})` : `background: ${c.bg}`;
+        
+        card.innerHTML = `
+            <div class="card-preview" style="${gradStyle}; color:${c.text}">
+                <button class="card-menu-btn" onclick="toggleMenu(event, '${c.id}')">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+                <div class="dropdown" id="menu-${c.id}">
+                    <button onclick="editCard('${c.id}')"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg> Edit</button>
+                    <button onclick="copyToClip('${c.bg}', 'Background')"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy BG</button>
+                    <button onclick="copyToClip('${c.text}', 'Text')"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy Text</button>
+                    <button onclick="deleteCard('${c.id}')" class="danger"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg> Delete</button>
                 </div>
-                <textarea spellcheck="false" oninput="updateContent('${card.id}', this.value)">${card.content}</textarea>
+                <textarea spellcheck="false" oninput="updateText('${c.id}', this.value)">${c.content}</textarea>
             </div>
             <div class="card-info">
                 <div class="stats-row">
-                    <div class="ratio-box">
-                        <span class="ratio-label">Contrast</span>
-                        <span class="ratio-value">${ratio.toFixed(2)}</span>
+                    <div>
+                        <span class="ratio-val">${val}</span>
+                        <span class="ratio-lbl">${settings.algo} Ratio</span>
                     </div>
-                    <div class="score-badge ${rating.class}">
-                        <span>${rating.score}</span>/10
+                    <div class="badges">
+                        ${labelStr}
                     </div>
-                </div>
-                <div class="wcag-status">
-                    <span class="pill ${rating.aa ? 'pass' : ''}">AA</span>
-                    <span class="pill ${rating.aaa ? 'pass' : ''}">AAA</span>
-                    <span style="margin-left:auto; opacity:0.7;">${rating.label}</span>
                 </div>
             </div>
         `;
-        addDragEvents(cardEl);
-        grid.appendChild(cardEl);
+        g.appendChild(card);
     });
-    save();
+    localStorage.setItem("ult_toolkit_data", JSON.stringify(cardsData));
 }
 
-// ==========================================
-// 5. INPUT SYNCING
-// ==========================================
-// Helper to sync Hex text <-> Color Picker
-function setupSync(pickerId, hexId) {
-    const picker = document.getElementById(pickerId);
-    const hex = document.getElementById(hexId);
-
-    picker.addEventListener('input', (e) => {
-        hex.value = e.target.value.replace("#", "").toUpperCase();
-    });
-
-    hex.addEventListener('input', (e) => {
-        let val = e.target.value.replace("#", "");
-        if (val.length === 6) picker.value = "#" + val;
-    });
-}
-
-setupSync('bgPicker', 'bgHex');
-setupSync('textPicker', 'textHex');
-
-// ==========================================
-// 6. ACTIONS
-// ==========================================
-function handleMainAction() {
+function addBox() {
     const bg = document.getElementById('bgPicker').value;
+    const bg2 = isGrad ? document.getElementById('bgPicker2').value : null;
     const text = document.getElementById('textPicker').value;
     
-    if (editingId) {
-        const index = cardsData.findIndex(c => c.id == editingId);
-        if (index > -1) {
-            cardsData[index].bg = bg;
-            cardsData[index].text = text;
-            render();
-            resetControls();
-        }
+    if(editId) {
+        const c = cardsData.find(x => x.id == editId);
+        c.bg = bg; c.bg2 = bg2; c.text = text;
+        editId = null;
+        document.getElementById('addBtn').innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Box`;
+        showToast("Card updated successfully", "success");
     } else {
-        cardsData.unshift({ id: Date.now(), bg, text, content: "Hello World" });
-        render();
+        cardsData.unshift({ id: Date.now(), bg, bg2, text, content: bg.toUpperCase() });
+        showToast("New card added", "success");
     }
-}
-
-function updateContent(id, text) {
-    const card = cardsData.find(c => c.id == id);
-    if(card) card.content = text;
-    save();
-}
-
-function deleteCard(id) {
-    if(confirm("Delete this combination?")) {
-        cardsData = cardsData.filter(c => c.id != id);
-        render();
-    }
+    render();
 }
 
 function editCard(id) {
-    const card = cardsData.find(c => c.id == id);
-    if(!card) return;
-
-    document.getElementById('bgPicker').value = card.bg;
-    document.getElementById('bgHex').value = card.bg.replace("#", "").toUpperCase();
-    document.getElementById('textPicker').value = card.text;
-    document.getElementById('textHex').value = card.text.replace("#", "").toUpperCase();
+    const c = cardsData.find(x => x.id == id);
+    document.getElementById('bgPicker').value = c.bg;
+    document.getElementById('textPicker').value = c.text;
     
-    editingId = id;
-    const btn = document.getElementById("mainActionBtn");
-    btn.innerHTML = `${ICONS.edit} <span>Update Box</span>`;
-    btn.classList.add("updating");
+    // Grad check
+    if(c.bg2) {
+        isGrad = true;
+        document.getElementById('bgPicker2').style.display = 'inline-block';
+        document.getElementById('bgPicker2').value = c.bg2;
+    } else if(isGrad) {
+        // Turn off if editing non-grad
+        isGrad = false;
+        document.getElementById('bgPicker2').style.display = 'none';
+    }
+
+    editId = id;
+    document.getElementById('addBtn').innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Update`;
     
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    closeDropdowns();
+    // Sync inputs
+    document.getElementById('bgPicker').dispatchEvent(new Event('input'));
+    document.getElementById('textPicker').dispatchEvent(new Event('input'));
+    
+    window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-function resetControls() {
-    editingId = null;
-    const btn = document.getElementById("mainActionBtn");
-    btn.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg> <span>Add Box</span>`;
-    btn.classList.remove("updating");
+function deleteCard(id) {
+    const cardEl = document.querySelector(`button[onclick="deleteCard('${id}')"]`).closest('.card');
+    cardEl.style.transform = 'scale(0.9)';
+    cardEl.style.opacity = '0';
+    setTimeout(() => {
+        cardsData = cardsData.filter(x => x.id != id);
+        render();
+        showToast("Card deleted", "danger");
+    }, 200);
 }
 
-function copyHex(val, btn) {
-    navigator.clipboard.writeText(val);
-    let original = btn.innerHTML;
-    btn.innerHTML = "Copied!";
-    setTimeout(() => btn.innerHTML = original, 1000);
+// BULK TOOLS
+function openBulkInput() { document.getElementById('bulkModal').style.display = 'grid'; }
+function processBulk() {
+    const input = document.getElementById('bulkArea').value;
+    // Regex matches hex codes
+    const hexes = input.match(/#[0-9a-f]{3,6}|[0-9a-f]{3,6}/gi);
+    
+    if(hexes && hexes.length > 0) {
+        let addedCount = 0;
+        hexes.forEach(h => {
+            let clean = h.startsWith('#') ? h : '#'+h;
+            if(clean.length === 4) clean = '#' + clean[1]+clean[1]+clean[2]+clean[2]+clean[3]+clean[3];
+            
+            if(clean.length === 7) {
+                // Auto text color
+                const rgb = h2r(clean);
+                const isBright = (rgb.r*0.299 + rgb.g*0.587 + rgb.b*0.114) > 186;
+                const text = isBright ? '#0f172a' : '#ffffff';
+                
+                cardsData.unshift({ 
+                    id: Date.now() + Math.random(), 
+                    bg: clean, 
+                    bg2: null, 
+                    text: text, 
+                    content: clean.toUpperCase() 
+                });
+                addedCount++;
+            }
+        });
+        showToast(`Generated ${addedCount} cards!`, "success");
+        render();
+        closeModals();
+        document.getElementById('bulkArea').value = '';
+    } else {
+        showToast("No valid hex codes found", "danger");
+    }
 }
 
+function bulkDelete() {
+    if(cardsData.length === 0) return showToast("Nothing to delete");
+    if(confirm("Are you sure you want to delete ALL cards?")) {
+        cardsData = [];
+        render();
+        showToast("All cards deleted", "danger");
+    }
+}
+
+function smartFix() {
+    const bg = h2r(document.getElementById('bgPicker').value);
+    const lumVal = (bg.r*0.299 + bg.g*0.587 + bg.b*0.114);
+    const best = lumVal > 150 ? "#0f172a" : "#ffffff";
+    document.getElementById('textPicker').value = best;
+    document.getElementById('textHex').value = best.replace("#","").toUpperCase();
+    showToast("Color contrast optimized", "success");
+}
+
+function toggleGradient() { 
+    isGrad = !isGrad; 
+    const p2 = document.getElementById('bgPicker2');
+    p2.style.display = isGrad ? 'inline-block' : 'none';
+    if(isGrad) showToast("Gradient mode ON");
+    else showToast("Gradient mode OFF");
+}
+
+function copyToClip(str, type) {
+    navigator.clipboard.writeText(str);
+    showToast(type ? `${type} copied: ${str}` : "Copied to clipboard", "success");
+}
+
+function swapColors() {
+    const b = document.getElementById('bgPicker');
+    const t = document.getElementById('textPicker');
+    const temp = b.value; 
+    b.value = t.value; 
+    t.value = temp;
+    b.dispatchEvent(new Event('input')); 
+    t.dispatchEvent(new Event('input'));
+    showToast("Colors swapped");
+}
+
+// Modals
+function openInfo() { document.getElementById('infoModal').style.display = 'grid'; }
+function openSettings() { document.getElementById('settingsModal').style.display = 'grid'; document.getElementById('algoSelect').value = settings.algo; }
+function openExport() { 
+    document.getElementById('exportModal').style.display = 'grid';
+    document.getElementById('exportArea').value = JSON.stringify(cardsData, null, 2);
+}
+function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+function toggleMenu(e, id) { 
+    e.stopPropagation(); 
+    document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); 
+    document.getElementById(`menu-${id}`).style.display = 'flex'; 
+}
+function updateText(id, val) { 
+    cardsData.find(x => x.id == id).content = val; 
+    localStorage.setItem("ult_toolkit_data", JSON.stringify(cardsData)); 
+}
+function updateSettings() { 
+    settings.algo = document.getElementById('algoSelect').value; 
+    localStorage.setItem("ult_settings", JSON.stringify(settings)); 
+    render(); 
+}
 function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem("theme", next);
+    const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem("ult_theme", t);
+    showToast(t === 'dark' ? "Dark mode enabled" : "Light mode enabled");
 }
 
-// ==========================================
-// 7. DRAG & DROP & UTILS
-// ==========================================
-let dragSrcEl = null;
+// Input Sync
+['bgHex', 'textHex'].forEach(id => {
+    const picker = document.getElementById(id.replace('Hex', 'Picker'));
+    const input = document.getElementById(id);
+    picker.addEventListener('input', () => input.value = picker.value.replace("#","").toUpperCase());
+    input.addEventListener('input', () => { if(input.value.length === 6) picker.value = "#"+input.value; });
+});
 
-function addDragEvents(item) {
-    item.addEventListener('dragstart', function(e) {
-        this.style.opacity = '0.4';
-        dragSrcEl = this;
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.innerHTML);
-    });
-    item.addEventListener('dragover', e => { e.preventDefault(); return false; });
-    item.addEventListener('drop', function(e) {
-        e.stopPropagation();
-        if (dragSrcEl !== this) {
-            const srcIdx = parseInt(dragSrcEl.dataset.index);
-            const targetIdx = parseInt(this.dataset.index);
-            const [moved] = cardsData.splice(srcIdx, 1);
-            cardsData.splice(targetIdx, 0, moved);
-            render();
-        }
-        return false;
-    });
-    item.addEventListener('dragend', function() {
-        this.style.opacity = '1';
-    });
-}
-
-function save() { localStorage.setItem("highlightToolkitData", JSON.stringify(cardsData)); }
-function toggleInfo() { 
-    const m = document.getElementById('infoModal'); 
-    m.style.display = m.style.display === 'grid' ? 'none' : 'grid'; 
-}
-function toggleMenu(e, id) {
-    e.stopPropagation();
-    closeDropdowns();
-    const m = document.getElementById(`dropdown-${id}`);
-    m.style.display = 'flex';
-}
-function closeDropdowns() { document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
-document.addEventListener('click', closeDropdowns);
-
-// Start
+document.addEventListener('click', () => document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'));
+document.documentElement.setAttribute('data-theme', localStorage.getItem("ult_theme") || 'light');
 render();
-
 </script>
 </body>
 </html>
